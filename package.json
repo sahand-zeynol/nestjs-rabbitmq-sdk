@@ -1,6 +1,6 @@
 {
   "name": "nestjs-rabbitmq-sdk",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Nest JS with RabbitMQ, including managing Channel, Exchange, Queue, Publisher, and Consumer",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
