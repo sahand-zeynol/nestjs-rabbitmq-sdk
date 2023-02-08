@@ -1,7 +1,7 @@
-import { IChannel } from './channel.interface';
-import { IExchange } from './exchange.interface';
-import { IPublish } from './publishOption.interface';
-import { IQueue } from './queue.interface';
+import { IChannel } from "./channel.interface";
+import { IExchange } from "./exchange.interface";
+import { IPublish } from "./publishOption.interface";
+import { IQueue } from "./queue.interface";
 
 export interface IRMQOptions {
   url: string;
@@ -10,4 +10,5 @@ export interface IRMQOptions {
   queues: { [key: string]: IQueue };
   consumers: { [key: string]: IPublish };
   publishers: { [key: string]: IPublish };
+  isGlobal?: boolean;
 }
