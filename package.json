@@ -1,0 +1,31 @@
+{
+  "name": "nestjs-rabbitmq-sdk",
+  "version": "1.0.0",
+  "description": "Nest JS with RabbitMQ, including managing Channel, Exchange, Queue, Publisher, and Consumer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rimraf dist && tsc",
+    "prepublish": "npm run build"
+  },
+  "author": "sahand-zeynol <sahand.zeynol@gmail.com>",
+  "keywords": [
+    "amqp",
+    "rabbitmq",
+    "typescript",
+    "nodejs",
+    "nestjs"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@nestjs/common": "^9.3.5",
+    "amqplib": "^0.10.3",
+    "rxjs": "^7.8.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.13.0",
+    "rimraf": "^4.1.2",
+    "typescript": "^4.9.5"
+  }
+}
