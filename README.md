@@ -1,21 +1,22 @@
 # nestjs-rabbitmq-sdk
 
 # Description
-This module created to handle all RabbitMQ features  including managing Channels, Exchanges, Queues, Publishers, and Consumers.
+This module was created to handle all RabbitMQ features  including managing Channels, Exchanges, Queues, Publishers, and Consumers.
 
-This package examples used [here](https://github.com/sahand-zeynol/nestjs-rabbitmq).
+You can find this package examples [here](https://github.com/sahand-zeynol/nestjs-rabbitmq).
 
 # Motivation
 
-I found some RabbitMQ features which did't supported by NestJS and most of them initiated decentralized.
-I tried to centralized initiation and use it wherever you want.
+I found some RabbitMQ features which was't supported by NestJS, and most of them were initiated decentralized.
+I tried to create centralized initiation
+ and you can use it wherever you want.
 # Usage
 
 Install
 ```bash
 npm install ---save nestjs-rabbitmq-sdk
 ```
-You can import `RmqModule` to the `imports` array of module for which you would like to discover handlers.   
+You can import `RmqModule` to the `imports` array of the module for which you would like to discover handlers.   
 
  ```typescript
 import { Module } from '@nestjs/common';
@@ -88,7 +89,7 @@ export class AppModule { }
  ```
 
  ## Usage with Services ( Consumer )
- If you imported `RmqModule` globally, you don't need to import it to module which you want to use.
+ If you import `RmqModule` globally, you don't need to import it to the module.
 
  ```typescript
 import { Injectable } from '@nestjs/common';
@@ -129,4 +130,4 @@ export class SimplePublisher implements OnModuleInit {
 
  # Contribute
 
- Contributions welcome!
+ Contributions are welcome!
