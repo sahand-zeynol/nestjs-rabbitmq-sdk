@@ -20,7 +20,7 @@ export class RmqService {
   private configExchanges: Record<string, IExchange>;
   private configConsumers: Record<string, IPublish>;
   private configPublishers: Record<string, IPublish>;
-  private channels: Record<string, Channel | ConfirmChannel>;
+  private channels: Record<string, Channel | ConfirmChannel> = {};
   private handlers = {};
 
   /**
