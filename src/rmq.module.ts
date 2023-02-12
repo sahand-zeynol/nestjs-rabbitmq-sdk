@@ -1,6 +1,7 @@
 import { DynamicModule, Module } from "@nestjs/common";
 import { RmqService } from "./rmq.service";
 import { IRMQOptions } from "./interfaces/rmq.service.options";
+import { Cache } from "cache-manager";
 
 @Module({})
 export class RmqModule {
@@ -8,7 +9,9 @@ export class RmqModule {
     const providers = [
       {
         provide: RmqService,
-        useValue: new RmqService(options),
+        useFactory: (cacheManager: Cache) => {
+          return new RmqService(options, cacheManager);
+        },
       },
     ];
 

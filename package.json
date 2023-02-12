@@ -25,6 +25,7 @@
   "dependencies": {
     "@nestjs/common": "^9.3.5",
     "amqplib": "^0.10.3",
+    "cache-manager": "^5.1.6",
     "rxjs": "^7.8.0",
     "uuid": "^9.0.0"
   },

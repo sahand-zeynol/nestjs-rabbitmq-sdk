@@ -1,8 +1,9 @@
 import { Channel, ConfirmChannel, connect, Connection, Options } from "amqplib";
 import { v4 as uuid } from "uuid";
-import { Injectable } from "@nestjs/common";
+import { CACHE_MANAGER, Inject, Injectable } from "@nestjs/common";
 import { delay, isNil } from "./helpers";
 import { IRMQOptions } from "./interfaces/rmq.service.options";
+import { Cache } from "cache-manager";
 import {
   IChannel,
   IExchange,
@@ -12,22 +13,25 @@ import {
 
 @Injectable()
 export class RmqService {
-  private options: IRMQOptions;
   private connectionRetry: boolean;
+  private consumerRetry: number;
   private connection: Connection;
-  private configChannels: { [key: string]: IChannel };
-  private configExchanges: { [key: string]: IExchange };
-  private configConsumers: { [key: string]: IPublish };
-  private configPublishers: { [key: string]: IPublish };
-  private channels: { [key: string]: Channel | ConfirmChannel } = {};
+  private configChannels: Record<string, IChannel>;
+  private configExchanges: Record<string, IExchange>;
+  private configConsumers: Record<string, IPublish>;
+  private configPublishers: Record<string, IPublish>;
+  private channels: Record<string, Channel | ConfirmChannel>;
   private handlers = {};
 
   /**
    * Constructor
    * @param options
    */
-  constructor(options: IRMQOptions) {
-    this.options = options;
+  constructor(
+    private options: IRMQOptions,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
+  ) {
+    this.consumerRetry = options.consumerRetry;
     this.configChannels = options.channels;
     this.configExchanges = options.exchanges;
     this.configConsumers = options.consumers;
@@ -272,17 +276,6 @@ export class RmqService {
         async (err, ok) => {
           if (err) {
             console.log(err);
-            // await confirmedChannel.sendToQueue(
-            //   PUBLISHER.UNHANDLED_EXCEPTION_QUEUE.QUEUE.QUEUE_NAME,
-            //   Buffer.from(
-            //     JSON.stringify([
-            //       new UnhandledException('ServiceBusService', 'sendToQueue', {
-            //         payload,
-            //         err,
-            //       }),
-            //     ]),
-            //   ),
-            // );
           }
 
           return resolve(ok);
@@ -326,17 +319,6 @@ export class RmqService {
         async (err, ok) => {
           if (err) {
             console.log(err);
-            // await confirmedChannel.sendToQueue(
-            //   PUBLISHER.UNHANDLED_EXCEPTION_QUEUE.QUEUE.QUEUE_NAME,
-            //   Buffer.from(
-            //     JSON.stringify([
-            //       new UnhandledException('ServiceBusService', 'publisher', {
-            //         payload,
-            //         err,
-            //       }),
-            //     ]),
-            //   ),
-            // );
           }
 
           return resolve(ok);
@@ -371,20 +353,22 @@ export class RmqService {
         await channel.ack(result);
       } catch (error) {
         console.log(error);
-        // const consumeErrorCount = await this.cacheManager.get(
-        //   result.properties.messageId,
-        // );
-        // if (consumeErrorCount > 5) {
-        //   // todo: Review this part, check if we wait for result then something fucking bad happens in the consumer!!!
-        //   await this.sendToQueue(PUBLISHER.ERRORS, result);
-        //   await channel.ack(result);
-        // } else {
-        //   await this.cacheManager.set(
-        //     result.properties.messageId,
-        //     +consumeErrorCount + 1,
-        //   );
-        //   await channel.nack(result, false, false);
-        // }
+        const consumeErrorCount = await this.cacheManager.get(
+          result.properties.messageId
+        );
+        if (this.consumerRetry && consumeErrorCount > this.consumerRetry) {
+          console.log(
+            `Error in consumer ${queue.QUEUE.QUEUE_NAME} with message: `,
+            result
+          );
+          await channel.ack(result);
+        } else {
+          await this.cacheManager.set(
+            result.properties.messageId,
+            +consumeErrorCount + 1
+          );
+          await channel.nack(result, false, false);
+        }
       }
     });
   }
