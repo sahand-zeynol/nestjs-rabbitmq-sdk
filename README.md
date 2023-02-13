@@ -14,7 +14,7 @@ I tried to create centralized initiation
 
 Install
 ```bash
-npm install ---save nestjs-rabbitmq-sdk
+npm install --save nestjs-rabbitmq-sdk
 ```
 You can import `RmqModule` to the `imports` array of the module for which you would like to discover handlers.   
 
