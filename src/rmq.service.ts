@@ -4,12 +4,7 @@ import { CACHE_MANAGER, Inject, Injectable } from "@nestjs/common";
 import { delay, isNil } from "./helpers";
 import { IRMQOptions } from "./interfaces/rmq.service.options";
 import { Cache } from "cache-manager";
-import {
-  IChannel,
-  IExchange,
-  IPublish,
-  IQueueWithExchange,
-} from "./interfaces";
+import { IChannel, IExchange, IPublish, PublishOptions } from "./interfaces";
 
 @Injectable()
 export class RmqService {
@@ -241,17 +236,9 @@ export class RmqService {
    * @param payload
    * @param options
    */
-  async publish(
-    queue: IPublish,
-    payload,
-    options?: object | IQueueWithExchange
-  ) {
+  async publish(queue: IPublish, payload, options?: object | PublishOptions) {
     if (queue.QUEUE.hasOwnProperty("EXCHANGE")) {
-      return await this.publisher(
-        queue,
-        payload,
-        (options as IQueueWithExchange)?.delayTime
-      );
+      return await this.publisher(queue, payload, options);
     }
 
     return await this.sendToQueue(queue, payload);
@@ -261,12 +248,14 @@ export class RmqService {
    * Directly send to queue without any exchange or rule
    * @param queue
    * @param payload
+   * @param options
    */
-  private async sendToQueue(queue: IPublish, payload) {
+  private async sendToQueue(
+    queue: IPublish,
+    payload,
+    options: PublishOptions = { messageId: uuid() }
+  ) {
     const confirmedChannel = this.channels[queue.CHANNEL_NAME];
-    const options: Options.Publish = {
-      messageId: uuid(),
-    };
 
     return new Promise((resolve) => {
       confirmedChannel.sendToQueue(
@@ -288,14 +277,18 @@ export class RmqService {
    * Publish
    * @param queue
    * @param payload
-   * @param delayTime
+   * @param options
    */
-  private async publisher(queue: IPublish, payload, delayTime = 0) {
+  private async publisher(
+    queue: IPublish,
+    payload,
+    options: PublishOptions = { messageId: uuid() }
+  ) {
     const confirmedChannel = this.channels[queue.CHANNEL_NAME];
     let headers: { [k: string]: any } = {};
     switch (queue.QUEUE.EXCHANGE.type) {
       case this.configExchanges.BUNNY.type: {
-        headers = { "x-delay": delayTime };
+        headers = { "x-delay": options?.delayTime || 0 };
         break;
       }
       case this.configExchanges.SINGLE_ACTIVE.type: {
@@ -306,16 +299,15 @@ export class RmqService {
         break;
       }
     }
+    options.headers = headers;
+    if (options.delayTime) delete options.delayTime;
 
     return new Promise((resolve) => {
       confirmedChannel.publish(
         queue.QUEUE.EXCHANGE.name,
         queue.QUEUE.QUEUE_NAME,
         Buffer.from(JSON.stringify([payload])),
-        {
-          messageId: uuid(),
-          headers,
-        },
+        options,
         async (err, ok) => {
           if (err) {
             console.log(err);
@@ -367,7 +359,7 @@ export class RmqService {
             result.properties.messageId,
             +consumeErrorCount + 1
           );
-          await channel.nack(result, false, false);
+          await channel.nack(result);
         }
       }
     });

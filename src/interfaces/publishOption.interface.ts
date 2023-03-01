@@ -1,7 +1,8 @@
-import { IQueue } from './queue.interface';
+import { IQueue } from "./queue.interface";
+import { Options } from "amqplib";
 
-export interface IQueueWithExchange {
-  delayTime: number;
+export interface PublishOptions extends Options.Publish {
+  delayTime?: number;
 }
 
 export interface IPublish {
