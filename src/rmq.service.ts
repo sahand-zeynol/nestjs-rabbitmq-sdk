@@ -241,7 +241,7 @@ export class RmqService {
       return await this.publisher(queue, payload, options);
     }
 
-    return await this.sendToQueue(queue, payload);
+    return await this.sendToQueue(queue, payload, options);
   }
 
   /**
