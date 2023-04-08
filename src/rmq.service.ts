@@ -253,9 +253,11 @@ export class RmqService {
   private async sendToQueue(
     queue: IPublish,
     payload,
-    options: PublishOptions = { messageId: uuid() }
+    options: PublishOptions = {}
   ) {
     const confirmedChannel = this.channels[queue.CHANNEL_NAME];
+
+    if (!options.messageId) options.messageId = uuid();
 
     return new Promise((resolve) => {
       confirmedChannel.sendToQueue(
@@ -282,7 +284,7 @@ export class RmqService {
   private async publisher(
     queue: IPublish,
     payload,
-    options: PublishOptions = { messageId: uuid() }
+    options: PublishOptions = {}
   ) {
     const confirmedChannel = this.channels[queue.CHANNEL_NAME];
     let headers: { [k: string]: any } = {};
@@ -299,6 +301,7 @@ export class RmqService {
         break;
       }
     }
+    if (!options.messageId) options.messageId = uuid();
     options.headers = headers;
     if (options.delayTime) delete options.delayTime;
 
