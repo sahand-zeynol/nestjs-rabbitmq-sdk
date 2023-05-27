@@ -24,7 +24,7 @@ export class RmqService {
    */
   constructor(
     private options: IRMQOptions,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
+    private cacheManager: Cache
   ) {
     this.consumerRetry = options.consumerRetry;
     this.configChannels = options.channels;
@@ -351,7 +351,7 @@ export class RmqService {
         const consumeErrorCount = await this.cacheManager.get(
           result.properties.messageId
         );
-        if (this.consumerRetry && consumeErrorCount > this.consumerRetry) {
+        if (this.consumerRetry && consumeErrorCount as number > this.consumerRetry) {
           console.log(
             `Error in consumer ${queue.QUEUE.QUEUE_NAME} with message: `,
             result
